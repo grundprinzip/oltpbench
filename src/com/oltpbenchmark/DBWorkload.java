@@ -183,10 +183,6 @@ public class DBWorkload {
         int lastTxnId = 0;
 
         
-        // Load TransactionTypes and keep them arround for later
-        List<TransactionType> ttypes = new ArrayList<TransactionType>();
-
-        
         for (String plugin : pluginList) {
         	
         	// ----------------------------------------------------------------
