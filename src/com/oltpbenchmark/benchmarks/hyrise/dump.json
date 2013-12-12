@@ -1,0 +1,29 @@
+{
+  "operators" : {
+      "getf" : {
+         "type" : "GetTable",
+         "name" : "friendships"
+      },
+      "getu" : {
+         "type" : "GetTable",
+         "name" : "users"
+      },
+      "df" : {
+      	"type" : "DumpTable",
+      	"name" : "friendships"
+      },
+      "du" : {
+      	"type" : "DumpTable",
+      	"name" : "users"
+      },
+      "nop" : {
+      	"type" : "NoOp"
+      }
+  },
+  "edges" : [
+    ["getf", "df"],
+    ["getu", "du"],
+    ["du", "nop"],
+    ["df", "nop"]
+  ]
+}

@@ -1,0 +1,32 @@
+{
+	"operators" :{
+		"friendship" : {
+			"type" : "JsonTable",
+			"names" : ["left", "right", "status"],
+			"types" : ["INTEGER", "INTEGER", "INTEGER"],
+			"groups" : [1,1,1],
+			"useStore" : true
+		},
+		
+		"set_fr" : {
+			"type" : "SetTable",
+			"name" : "friendships"
+		},
+		"load_users" : {
+			"type" : "JsonTable",
+			"names" :  ["userid","username","pw","fname","lname","gender","dob","jdate","ldate","address","email","tel","tpic","pic"],
+			"types" : ["INTEGER", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING"],
+			"groups" : [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			"useStore": true
+		},
+		"set" : {
+		    "type" : "SetTable",
+		    "name" : "users"
+		}
+	},
+	"edges" : [
+		["load_users", "set"],
+		["set", "friendship"],
+		["friendship", "set_fr"]
+	]
+}

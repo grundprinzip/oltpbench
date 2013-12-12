@@ -2,13 +2,27 @@
 	"operators" : {
 		"get" : {
 			"type" : "GetTable",
-			"name" : "manipulations"
+			"name" : "users"
 		},
 		"idx_mod" : {
       		"type": "MergeStore"
+    	},
+    	"get2" : {
+			"type" : "GetTable",
+			"name" : "friendships"
+		},
+		"m2" : {
+      		"type": "MergeStore"
+    	},
+    	"nop" : {
+    		"type" : "NoOp"
     	}
 	},
 	"edges" : [
-		["get", "idx_mod"]
+		["get", "idx_mod"],
+		["get", "get2"],
+		["get2", "m2"],
+		["m2", "nop"],
+		["idx_mod", "nop"]
 	]
 }

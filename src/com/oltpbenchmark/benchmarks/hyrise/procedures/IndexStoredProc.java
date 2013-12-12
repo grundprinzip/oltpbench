@@ -12,7 +12,7 @@ public class IndexStoredProc extends HyriseProcedure {
     @Override
     public void runQuery(Connection conn, int id) throws SQLException {
         
-        CallableStatement cb = conn.prepareCall("/proc/indexscan\nlimit=1&table=manipulations&index=mod_idx&value=" + r.nextInt(id) );
+        CallableStatement cb = conn.prepareCall("/proc/indexscan\nlimit=1&table=users&index=users_idx&value=" + r.nextInt(id) );
         cb.executeQuery();
 
     }

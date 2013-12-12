@@ -3,13 +3,13 @@
 	"operators" : {
 		"get" : {
 			"type" : "GetTable",
-			"name" : "manipulations"
+			"name" : "users"
 		},
 		"idx" : {
       		"type": "IndexScan",
       		"value": %s,
       		"fields": [0],
-      		"index": "mod_idx"
+      		"index": "users_idx"
     	}
 	},
 	"edges" : [

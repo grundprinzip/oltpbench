@@ -18,6 +18,9 @@ public abstract class TextGenerator {
         } // FOR
     } // STATIC
 
+    public static final char[] SAFE_CHARS = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9'};
+    
+    
     /**
      * Generate a random block of text as a char array
      * @param rng
@@ -47,6 +50,14 @@ public abstract class TextGenerator {
      */
     public static String randomStr(Random rng, int strLen) {
         return new String(randomChars(rng, strLen));
+    }
+    
+    public static String randomStrSafe(Random rng, int strLen) {
+        char chars[] = new char[strLen];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char)SAFE_CHARS[rng.nextInt(SAFE_CHARS.length)];
+        }
+        return new String(chars);
     }
     
     /**

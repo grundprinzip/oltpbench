@@ -1,0 +1,51 @@
+{
+  "performance" : false,
+  "operators" : {
+      "setf" : {
+         "type" : "SetTable",
+         "name" : "friendships"
+      },
+      "setu" : {
+         "type" : "SetTable",
+         "name" : "users"
+      },
+      "df" : {
+      	"type" : "LoadDumpedTable",
+      	"name" : "friendships"
+      },
+      "du" : {
+      	"type" : "LoadDumpedTable",
+      	"name" : "users"
+      },
+      "nop" : {
+      	"type" : "NoOp"
+      }, 
+      "idx_users" : {
+      	"type": "CreateIndex",
+      	"fields": [0],
+      	"index_name": "users_idx"
+      },
+      "idx_friendships" : {
+      	"type": "CreateIndex",
+      	"fields": [0],
+      	"index_name": "friendships_idx"
+      },
+      "idx_friendships_2" : {
+      	"type": "CreateIndex",
+      	"fields": [1],
+      	"index_name": "friendships_right_idx"
+      }
+  },
+  "edges" : [
+    ["df", "setf"],
+    ["du", "setu"],
+    
+    ["setu", "idx_users"],
+    ["setf", "idx_friendships"],
+    ["setf", "idx_friendships_2"],
+    
+    ["idx_users", "nop"],
+    ["idx_friendships_2", "nop"],
+    ["idx_friendships", "nop"]
+  ]
+}

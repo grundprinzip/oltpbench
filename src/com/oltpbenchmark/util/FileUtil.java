@@ -52,7 +52,6 @@ public abstract class FileUtil {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (String a : args) {
-<<<<<<< HEAD
             if (a != null && a.length() > 0) {
                 if (!first) {
                     result.append("/");
@@ -60,13 +59,6 @@ public abstract class FileUtil {
                 result.append(a);
                 first = false;
             }
-=======
-            if (!first) {
-                result.append("/");
-            }
-            result.append(a);
-            first = false;
->>>>>>> Make love to the outputfile generation
         }
         return result.toString();
     }

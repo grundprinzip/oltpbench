@@ -2,15 +2,31 @@
 	"operators" : {
 		"get" : {
 			"type" : "GetTable",
-			"name" : "manipulations"
+			"name" : "users"
 		},
 		"idx_mod" : {
       		"type": "CreateIndex",
-      		"fields": [1],
-      		"index_name": "mod_idx"
+      		"fields": [0],
+      		"index_name": "users_idx"
+    	},
+    	"get2" : {
+			"type" : "GetTable",
+			"name" : "friendships"
+		},
+		"m2" : {
+      		"type": "CreateIndex",
+      		"fields": [0],
+      		"index_name": "friendships_idx"
+    	},
+    	"nop" : {
+    		"type" : "NoOp"
     	}
 	},
 	"edges" : [
-		["get", "idx_mod"]
+		["get", "idx_mod"],
+		["get", "get2"],
+		["get2", "m2"],
+		["m2", "nop"],
+		["idx_mod", "nop"]
 	]
 }
