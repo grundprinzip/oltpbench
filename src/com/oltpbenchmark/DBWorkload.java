@@ -182,6 +182,11 @@ public class DBWorkload {
         xmlConfig.setExpressionEngine(new XPathExpressionEngine());
         int lastTxnId = 0;
 
+        
+        // Load TransactionTypes and keep them arround for later
+        List<TransactionType> ttypes = new ArrayList<TransactionType>();
+
+        
         for (String plugin : pluginList) {
         	
         	// ----------------------------------------------------------------
@@ -320,6 +325,7 @@ public class DBWorkload {
 	        INIT_LOG.info(SINGLE_LINE);
 
         
+
 	        // Load TransactionTypes
 	        List<TransactionType> ttypes = new ArrayList<TransactionType>();
 

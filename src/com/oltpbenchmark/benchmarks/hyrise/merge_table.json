@@ -1,0 +1,14 @@
+{
+	"operators" : {
+		"get" : {
+			"type" : "GetTable",
+			"name" : "manipulations"
+		},
+		"idx_mod" : {
+      		"type": "MergeStore"
+    	}
+	},
+	"edges" : [
+		["get", "idx_mod"]
+	]
+}

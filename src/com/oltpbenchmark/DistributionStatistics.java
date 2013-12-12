@@ -35,15 +35,17 @@ public class DistributionStatistics {
 	private static final int MAXIMUM = 7;
 
 	private final int count;
+	private final double sum;
 	private final long[] percentiles;
 	private final double average;
 	private final double standardDeviation;
 
 	public DistributionStatistics(int count, long[] percentiles,
-			double average, double standardDeviation) {
+			double average, double standardDeviation, double sum) {
 		assert count > 0;
 		assert percentiles.length == PERCENTILES.length;
 		this.count = count;
+		this.sum = sum;
 		this.percentiles = Arrays.copyOfRange(percentiles, 0,
 				PERCENTILES.length);
 		this.average = average;
@@ -63,7 +65,7 @@ public class DistributionStatistics {
 			for (int i = 0; i < percentiles.length; ++i) {
 				percentiles[i] = -1;
 			}
-			return new DistributionStatistics(values.length, percentiles, 0,0);
+			return new DistributionStatistics(values.length, percentiles, 0,0, 0.0);
 		
 		}
 		Arrays.sort(values);
@@ -98,7 +100,11 @@ public class DistributionStatistics {
 		}
 
 		return new DistributionStatistics(values.length, percentiles, average,
-				standardDeviation);
+				standardDeviation, sum);
+	}
+	
+	public double getSum() {
+	    return sum;
 	}
 
 	public int getCount() {

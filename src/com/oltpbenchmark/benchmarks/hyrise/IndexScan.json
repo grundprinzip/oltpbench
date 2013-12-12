@@ -1,0 +1,18 @@
+{
+	"priority" : 1,
+	"operators" : {
+		"get" : {
+			"type" : "GetTable",
+			"name" : "manipulations"
+		},
+		"idx" : {
+      		"type": "IndexScan",
+      		"value": %s,
+      		"fields": [0],
+      		"index": "mod_idx"
+    	}
+	},
+	"edges" : [
+		["get", "idx"]
+	]
+}

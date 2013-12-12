@@ -3,17 +3,18 @@ package com.oltpbenchmark.benchmarks.hyrise.procedures;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Random;
 
-import com.oltpbenchmark.api.Procedure;
-import com.oltpbenchmark.api.SQLStmt;
-
-public class NoOpProc extends HyriseProcedure {
-
+public class IndexScan extends HyriseProcedure {
+    
+    Random r = new Random();
+    
     @Override
     public void runQuery(Connection conn, int id) throws SQLException {
         PreparedStatement stmt = this.getPreparedStatement(conn, query);
-        stmt.executeUpdate();
-        
+        stmt.setInt(0, r.nextInt(id));
+        stmt.setMaxRows(1);
+        stmt.executeUpdate();                
     }
-    
+
 }

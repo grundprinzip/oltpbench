@@ -38,6 +38,6 @@
 	<classpathentry kind="lib" path="lib/sqljdbc4.jar"/>
 	<classpathentry kind="lib" path="lib/h2-1.3.163.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.2.jar"/>
-	<classpathentry kind="lib" path="lib/hyrise_jdbc.jar" sourcepath="/HyriseJDBC"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/HyriseJDBC"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

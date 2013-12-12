@@ -1,0 +1,10 @@
+{
+	"operators": {
+		"unload" : {
+			"type": "UnloadAll"
+		}
+	},
+	"edges" : [
+		["unload", "unload"]
+	]
+}

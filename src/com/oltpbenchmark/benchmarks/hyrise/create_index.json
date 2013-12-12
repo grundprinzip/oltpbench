@@ -1,0 +1,16 @@
+{
+	"operators" : {
+		"get" : {
+			"type" : "GetTable",
+			"name" : "manipulations"
+		},
+		"idx_mod" : {
+      		"type": "CreateIndex",
+      		"fields": [1],
+      		"index_name": "mod_idx"
+    	}
+	},
+	"edges" : [
+		["get", "idx_mod"]
+	]
+}

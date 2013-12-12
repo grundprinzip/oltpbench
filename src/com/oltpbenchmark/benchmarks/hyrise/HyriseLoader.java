@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import com.oltpbenchmark.api.BenchmarkModule;
 import com.oltpbenchmark.api.Loader;
+import com.oltpbenchmark.benchmarks.hyrise.procedures.LoadProc;
 
 public class HyriseLoader extends Loader {
 
@@ -14,6 +15,12 @@ public class HyriseLoader extends Loader {
 
     @Override
     public void load() throws SQLException {
+        
+        
+        double sf = benchmark.getWorkloadConfiguration().getScaleFactor();
+        LoadProc lp = new LoadProc();
+        lp.run(this.conn, 0, sf);
+        
     }
 
 }

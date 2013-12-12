@@ -45,7 +45,6 @@ import com.oltpbenchmark.util.StringUtil;
 public class ThreadBench implements Thread.UncaughtExceptionHandler {
     private static final Logger LOG = Logger.getLogger(ThreadBench.class);
 
-    
     private static BenchmarkState testState;
     private final List<? extends Worker> workers;
     private final ArrayList<Thread> workerThreads;
