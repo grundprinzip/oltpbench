@@ -3,6 +3,9 @@ package com.oltpbenchmark.util;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class captures optional schema modifcation information for each benchmark.
  * <p/>
@@ -20,6 +23,18 @@ public class SchemaConfiguration {
 
     int extendSchemaBy = 0;
 
+
+    /**
+     * Build the column names from the extended Schema Variable
+     * @return list of columns to append
+     */
+    public List<String> extendedColumnNames() {
+        ArrayList<String> cols = new ArrayList<>();
+        for(int i=0; i < extendSchemaBy; ++i) {
+            cols.add("extended_col_"+i);
+        }
+        return cols;
+    }
 
 
     /**

@@ -30,15 +30,24 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.List;
 
+import com.oltpbenchmark.benchmarks.tpcc.TPCCUtil;
 import com.oltpbenchmark.benchmarks.tpcc.pojo.NewOrder;
 import com.oltpbenchmark.benchmarks.tpcc.pojo.Oorder;
 import com.oltpbenchmark.benchmarks.tpcc.pojo.OrderLine;
+import com.oltpbenchmark.util.SchemaConfiguration;
 
 
 public class jdbcIO {
 
-	public void insertOrder(PreparedStatement ordrPrepStmt, Oorder oorder) {
+    SchemaConfiguration config = null;
+
+    public jdbcIO(SchemaConfiguration schemaConfiguration) {
+        config = schemaConfiguration;
+    }
+
+    public void insertOrder(PreparedStatement ordrPrepStmt, Oorder oorder) {
 
 		try {
 
@@ -103,6 +112,15 @@ public class jdbcIO {
 			orlnPrepStmt.setLong(8, order_line.ol_supply_w_id);
 			orlnPrepStmt.setDouble(9, order_line.ol_quantity);
 			orlnPrepStmt.setString(10, order_line.ol_dist_info);
+
+            // Append manual extended fields
+            if (config != null) {
+                int offset = 11;
+                List<String> cols = config.extendedColumnNames();
+                for(String c : cols) {
+                    orlnPrepStmt.setString(offset++, TPCCUtil.randomNStr(24));
+                }
+            }
 
 			orlnPrepStmt.addBatch();
 

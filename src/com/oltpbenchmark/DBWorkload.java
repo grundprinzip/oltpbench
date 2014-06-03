@@ -330,7 +330,7 @@ public class DBWorkload {
             // ----------------------------------------------------------------
             // SCHEMA MODIFICATION
             // ----------------------------------------------------------------
-            if (xmlConfig.containsKey("schema")) {
+            if (xmlConfig.configurationAt("schema") != null) {
                 SchemaConfiguration schema = SchemaConfiguration.build(xmlConfig.configurationAt("schema"));
                 wrkld.setSchemaConfiguration(schema);
             }
