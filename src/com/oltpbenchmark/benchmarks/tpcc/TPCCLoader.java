@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -99,11 +100,15 @@ public class TPCCLoader extends Loader {
 
     private static final int FIRST_UNPROCESSED_O_ID = 2101;
 
-    private PreparedStatement getInsertStatement(String tableName) throws SQLException {
-        Table catalog_tbl = this.getTableCatalog(tableName);
+    // Check which tables are allowed to modify the schema
+    static final List<String> allowedTablesForSchemaModifications = Arrays.asList(TPCCConstants.TABLENAME_ORDERLINE,
+            TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_HISTORY);
 
+    private PreparedStatement getInsertStatement(String tableName) throws SQLException {
+
+        Table catalog_tbl = this.getTableCatalog(tableName);
         // Make sure to add our new columns
-        if (tableName.equals(TPCCConstants.TABLENAME_ORDERLINE) && workConf.hasSchemaConfiguration()) {
+        if ( allowedTablesForSchemaModifications.contains(tableName) && workConf.hasSchemaConfiguration()) {
             for(String c : workConf.getSchemaConfiguration().extendedColumnNames()) {
                 Column col = new Column(catalog_tbl, c, Types.VARCHAR, "VARCHAR", 255);
                 catalog_tbl.addColumn(col);
@@ -145,7 +150,7 @@ public class TPCCLoader extends Loader {
 
         LOG.debug("Truncating '" + strTable + "' ...");
         try {
-            this.conn.createStatement().execute("DELETE FROM " + strTable);
+            this.conn.createStatement().execute("TRUNCATE " + strTable);
             transCommit();
         } catch (SQLException se) {
             LOG.debug(se.getMessage());
@@ -769,6 +774,10 @@ public class TPCCLoader extends Loader {
                             custPrepStmt.setString(20, customer.c_middle);
                             custPrepStmt.setString(21, customer.c_data);
 
+                            if (workConf.hasSchemaConfiguration()) {
+                                workConf.getSchemaConfiguration().extendPreparedStatement(custPrepStmt, 22);
+                            }
+
                             custPrepStmt.addBatch();
 
                             histPrepStmt.setInt(1, history.h_c_id);
@@ -780,6 +789,10 @@ public class TPCCLoader extends Loader {
                             histPrepStmt.setTimestamp(6, history.h_date);
                             histPrepStmt.setDouble(7, history.h_amount);
                             histPrepStmt.setString(8, history.h_data);
+
+                            if (workConf.hasSchemaConfiguration()) {
+                                workConf.getSchemaConfiguration().extendPreparedStatement(histPrepStmt, 9);
+                            }
 
                             histPrepStmt.addBatch();
 
@@ -818,6 +831,9 @@ public class TPCCLoader extends Loader {
                             str = str + customer.c_state + ",";
                             str = str + customer.c_zip + ",";
                             str = str + customer.c_phone;
+                            if (workConf.hasSchemaConfiguration()) {
+                                str += ";" + workConf.getSchemaConfiguration().extendByString();
+                            }
                             out.println(str);
 
                             str = "";
@@ -829,6 +845,9 @@ public class TPCCLoader extends Loader {
                             str = str + history.h_date + ",";
                             str = str + history.h_amount + ",";
                             str = str + history.h_data;
+                            if (workConf.hasSchemaConfiguration()) {
+                                str += ";" + workConf.getSchemaConfiguration().extendByString();
+                            }
                             outHist.println(str);
 
                             if ((k % configCommitCount) == 0) {
@@ -1050,6 +1069,7 @@ public class TPCCLoader extends Loader {
                                 str = str + order_line.ol_dist_info;
 
                                 if (workConf.hasSchemaConfiguration()) {
+                                    str += ",";
                                     List<String> cols = workConf.getSchemaConfiguration().extendedColumnNames();
                                     for(String ignored : cols ) {
                                         str = str + TPCCUtil.randomNStr(24) + ",";
@@ -1146,12 +1166,8 @@ public class TPCCLoader extends Loader {
             if (workConf.hasSchemaConfiguration()) {
                 SchemaConfiguration schema = workConf.getSchemaConfiguration();
                 List<String> cols = schema.extendedColumnNames();
-                String tables[] = {TPCCConstants.TABLENAME_ORDERLINE};
-//                String tables[] = {TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_DISTRICT, TPCCConstants.TABLENAME_HISTORY,
-//                        TPCCConstants.TABLENAME_ITEM, TPCCConstants.TABLENAME_HISTORY, TPCCConstants.TABLENAME_NEWORDER,
-//                        TPCCConstants.TABLENAME_STOCK, TPCCConstants.TABLENAME_WAREHOUSE, TPCCConstants.TABLENAME_OPENORDER};
 
-                for(String t : tables ){
+                for(String t : allowedTablesForSchemaModifications ){
 
                     for (String c : cols) {
                         alterTableAddColumn(t, c);

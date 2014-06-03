@@ -1,8 +1,11 @@
 package com.oltpbenchmark.util;
 
+import com.oltpbenchmark.benchmarks.tpcc.TPCCUtil;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +39,23 @@ public class SchemaConfiguration {
         return cols;
     }
 
+
+    public void extendPreparedStatement(PreparedStatement ps, int offset) throws SQLException {
+        for (int i = 0; i < extendSchemaBy; i++) {
+            ps.setString(offset + i, TPCCUtil.randomNStr(24));
+        }
+    }
+
+    public String extendByString() {
+        StringBuilder bld = new StringBuilder();
+        for (int i = 0; i < extendSchemaBy; i++) {
+            bld.append(TPCCUtil.randomNStr(24));
+            if (i < extendSchemaBy - 1) {
+                bld.append(";");
+            }
+        }
+        return bld.toString();
+    }
 
     /**
      * Private constructor only use builder
