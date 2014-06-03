@@ -6,17 +6,36 @@
     <driver>com.mysql.jdbc.Driver</driver>
     <DBUrl>jdbc:mysql://localhost:3306/tpcc</DBUrl>
     <username>root</username>
-    <password></password>
+    <password>root</password>
     <isolation>TRANSACTION_SERIALIZABLE</isolation>
     
     <!-- Scale factor is the number of warehouses in TPCC -->
     <scalefactor>2</scalefactor>
+
+    <schema>
+        <!-- Extend the schema by x columns, each loader has to handle the information provided here -->
+        <extendBy>10</extendBy>
+
+
+        <!-- Change distribution of columns in this benchmark -->
+        <distributionMap>
+            <column>
+                <table>order_line</table>
+                <name>OL_I_ID</name>
+                <value>zipf</value>
+                <type>java.lang.Integer</type>
+                <param>2</param>
+            </column>
+        </distributionMap>
+
+
+    </schema>
     
     <!-- The workload -->
     <terminals>2</terminals>
     <works>
         <work>
-          <time>60</time>
+          <time>10</time>
           <rate>10000</rate>
           <weights>45,43,4,4,4</weights>
         </work>

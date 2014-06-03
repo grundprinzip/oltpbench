@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.oltpbenchmark.util.SchemaConfiguration;
 import org.apache.commons.collections15.map.ListOrderedMap;
 import org.apache.commons.configuration.XMLConfiguration;
 
@@ -33,7 +34,9 @@ import com.oltpbenchmark.types.DatabaseType;
 import com.oltpbenchmark.util.StringUtil;
 
 public class WorkloadConfiguration {
-    
+
+    private SchemaConfiguration schema_configuration = null;
+
 	private DatabaseType db_type;	
 	private String benchmarkName;
 	public String getBenchmarkName() {
@@ -284,5 +287,17 @@ public class WorkloadConfiguration {
             m.put(f.getName().toUpperCase(), obj);
         } // FOR
         return StringUtil.formatMaps(m);
+    }
+
+    public SchemaConfiguration getSchemaConfiguration() {
+        return schema_configuration;
+    }
+
+    public void setSchemaConfiguration(SchemaConfiguration schema_configuration) {
+        this.schema_configuration = schema_configuration;
+    }
+
+    public boolean hasSchemaConfiguration() {
+        return schema_configuration != null;
     }
 }

@@ -77,7 +77,7 @@ public class TPCCLoader extends Loader{
             //where would be fun in that?
             numWarehouses = 1;
         }
-        outputFiles= false;
+        outputFiles= true;
 	}
 
 	static boolean fastLoad;
@@ -90,7 +90,7 @@ public class TPCCLoader extends Loader{
 
 	private static Random gen;
 	private static int numWarehouses = 0;
-	private static String fileLocation = "";
+	private static String fileLocation = "./data/";
 	private static boolean outputFiles = false;
 	private static PrintWriter out = null;
 	private static long lastTimeMS = 0;
@@ -1011,9 +1011,10 @@ public class TPCCLoader extends Loader{
 								str = str + order_line.ol_o_id + ",";
 								str = str + order_line.ol_number + ",";
 								str = str + order_line.ol_i_id + ",";
-								Timestamp delivery_d = new Timestamp(
-										order_line.ol_delivery_d);
-								str = str + delivery_d + ",";
+                                if (order_line.ol_delivery_d == null)
+                                    str = str + "0,";
+                                else
+                                    str = str + (new Timestamp(order_line.ol_delivery_d)) + ",";
 								str = str + order_line.ol_amount + ",";
 								str = str + order_line.ol_supply_w_id + ",";
 								str = str + order_line.ol_quantity + ",";

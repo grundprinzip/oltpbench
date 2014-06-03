@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.zip.GZIPOutputStream;
 
-import com.oltpbenchmark.util.ResultUploader;
+import com.oltpbenchmark.util.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -47,11 +47,6 @@ import com.oltpbenchmark.api.TransactionType;
 import com.oltpbenchmark.api.TransactionTypes;
 import com.oltpbenchmark.api.Worker;
 import com.oltpbenchmark.types.DatabaseType;
-import com.oltpbenchmark.util.ClassUtil;
-import com.oltpbenchmark.util.FileUtil;
-import com.oltpbenchmark.util.QueueLimitException;
-import com.oltpbenchmark.util.StringUtil;
-import com.oltpbenchmark.util.TimeUtil;
 
 public class DBWorkload {
     private static final Logger LOG = Logger.getLogger(DBWorkload.class);
@@ -331,6 +326,14 @@ public class DBWorkload {
             groupings.put("all", weightAll);
 	        
             benchList.add(bench);
+
+            // ----------------------------------------------------------------
+            // SCHEMA MODIFICATION
+            // ----------------------------------------------------------------
+            if (xmlConfig.containsKey("schema")) {
+                SchemaConfiguration schema = SchemaConfiguration.build(xmlConfig.configurationAt("schema"));
+                wrkld.setSchemaConfiguration(schema);
+            }
 
             // ----------------------------------------------------------------
             // WORKLOAD CONFIGURATION
