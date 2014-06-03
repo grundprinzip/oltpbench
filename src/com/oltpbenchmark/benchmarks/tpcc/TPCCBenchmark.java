@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -39,6 +40,11 @@ import com.oltpbenchmark.util.SimpleSystemPrinter;
 
 public class TPCCBenchmark extends BenchmarkModule {
     private static final Logger LOG = Logger.getLogger(TPCCBenchmark.class);
+
+    // Check which tables are allowed to modify the schema
+    public static final List<String> allowedTablesForSchemaModifications = Arrays.asList(TPCCConstants.TABLENAME_ORDERLINE,
+            TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_HISTORY, TPCCConstants.TABLENAME_DISTRICT,
+            TPCCConstants.TABLENAME_ITEM, TPCCConstants.TABLENAME_OPENORDER);
 
 	public TPCCBenchmark(WorkloadConfiguration workConf) {
 		super("tpcc", workConf, true);

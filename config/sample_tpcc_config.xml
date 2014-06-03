@@ -15,7 +15,7 @@
     <schema>
         <!-- Extend the schema by x columns, each loader has to handle the information provided here -->
         <extendBy>10</extendBy>
-
+        <useFieldsDuringQueries>true</useFieldsDuringQueries>
 
         <!-- Change distribution of columns in this benchmark -->
         <distributionMap>

@@ -85,17 +85,12 @@ public class TPCCLoader extends Loader {
 
     private static final int FIRST_UNPROCESSED_O_ID = 2101;
 
-    // Check which tables are allowed to modify the schema
-    static final List<String> allowedTablesForSchemaModifications = Arrays.asList(TPCCConstants.TABLENAME_ORDERLINE,
-            TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_HISTORY, TPCCConstants.TABLENAME_DISTRICT,
-            TPCCConstants.TABLENAME_ITEM, TPCCConstants.TABLENAME_OPENORDER);
-
     private PreparedStatement getInsertStatement(String tableName) throws SQLException {
 
         Table catalog_tbl = this.getTableCatalog(tableName);
 
         // Make sure to add our new columns, but only to tables that are marked for schema extension
-        if ( allowedTablesForSchemaModifications.contains(tableName) && workConf.hasSchemaConfiguration()) {
+        if ( TPCCBenchmark.allowedTablesForSchemaModifications.contains(tableName) && workConf.hasSchemaConfiguration()) {
             for(String c : workConf.getSchemaConfiguration().extendedColumnNames()) {
                 Column col = new Column(catalog_tbl, c, Types.VARCHAR, "VARCHAR", 255);
                 catalog_tbl.addColumn(col);
@@ -1174,7 +1169,7 @@ public class TPCCLoader extends Loader {
                 SchemaConfiguration schema = workConf.getSchemaConfiguration();
                 List<String> cols = schema.extendedColumnNames();
 
-                for(String t : allowedTablesForSchemaModifications ){
+                for(String t : TPCCBenchmark.allowedTablesForSchemaModifications ){
 
                     for (String c : cols) {
                         alterTableAddColumn(t, c);
