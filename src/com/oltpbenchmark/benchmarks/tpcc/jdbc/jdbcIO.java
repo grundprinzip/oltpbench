@@ -65,6 +65,10 @@ public class jdbcIO {
 			Timestamp entry_d = new java.sql.Timestamp(oorder.o_entry_d);
 			ordrPrepStmt.setTimestamp(8, entry_d);
 
+            if (config != null ) {
+                config.extendPreparedStatement(ordrPrepStmt, 9);
+            }
+
 			ordrPrepStmt.addBatch();
 			//ordrPrepStmt.execute();
 			

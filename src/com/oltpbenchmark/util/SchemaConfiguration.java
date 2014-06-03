@@ -40,12 +40,24 @@ public class SchemaConfiguration {
     }
 
 
+    /**
+     * Append random strings to a prepared statement during load
+     *
+     * @param ps the prepared statement to modify
+     * @param offset offset to check
+     * @throws SQLException
+     */
     public void extendPreparedStatement(PreparedStatement ps, int offset) throws SQLException {
         for (int i = 0; i < extendSchemaBy; i++) {
             ps.setString(offset + i, TPCCUtil.randomNStr(24));
         }
     }
 
+    /**
+     * Generate random strings to append during CSV generation
+     *
+     * @return
+     */
     public String extendByString() {
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < extendSchemaBy; i++) {

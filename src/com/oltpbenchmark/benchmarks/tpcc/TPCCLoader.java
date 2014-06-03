@@ -36,38 +36,23 @@ package com.oltpbenchmark.benchmarks.tpcc;
  *
  */
 
-import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.configCommitCount;
-import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.configCustPerDist;
-import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.configDistPerWhse;
-import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.configItemCount;
-import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.configWhseCount;
+import com.oltpbenchmark.api.Loader;
+import com.oltpbenchmark.benchmarks.tpcc.jdbc.jdbcIO;
+import com.oltpbenchmark.benchmarks.tpcc.pojo.*;
+import com.oltpbenchmark.catalog.Column;
+import com.oltpbenchmark.catalog.Table;
+import com.oltpbenchmark.util.SQLUtil;
+import com.oltpbenchmark.util.SchemaConfiguration;
+import org.apache.log4j.Logger;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.oltpbenchmark.WorkloadConfiguration;
-import com.oltpbenchmark.catalog.Column;
-import com.oltpbenchmark.util.SchemaConfiguration;
-import org.apache.log4j.Logger;
-
-import com.oltpbenchmark.api.Loader;
-import com.oltpbenchmark.benchmarks.tpcc.jdbc.jdbcIO;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.Customer;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.District;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.History;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.Item;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.NewOrder;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.Oorder;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.OrderLine;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.Stock;
-import com.oltpbenchmark.benchmarks.tpcc.pojo.Warehouse;
-import com.oltpbenchmark.catalog.Table;
-import com.oltpbenchmark.util.SQLUtil;
+import static com.oltpbenchmark.benchmarks.tpcc.jTPCCConfig.*;
 
 public class TPCCLoader extends Loader {
     private static final Logger LOG = Logger.getLogger(TPCCLoader.class);
@@ -102,12 +87,14 @@ public class TPCCLoader extends Loader {
 
     // Check which tables are allowed to modify the schema
     static final List<String> allowedTablesForSchemaModifications = Arrays.asList(TPCCConstants.TABLENAME_ORDERLINE,
-            TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_HISTORY);
+            TPCCConstants.TABLENAME_CUSTOMER, TPCCConstants.TABLENAME_HISTORY, TPCCConstants.TABLENAME_DISTRICT,
+            TPCCConstants.TABLENAME_ITEM, TPCCConstants.TABLENAME_OPENORDER);
 
     private PreparedStatement getInsertStatement(String tableName) throws SQLException {
 
         Table catalog_tbl = this.getTableCatalog(tableName);
-        // Make sure to add our new columns
+
+        // Make sure to add our new columns, but only to tables that are marked for schema extension
         if ( allowedTablesForSchemaModifications.contains(tableName) && workConf.hasSchemaConfiguration()) {
             for(String c : workConf.getSchemaConfiguration().extendedColumnNames()) {
                 Column col = new Column(catalog_tbl, c, Types.VARCHAR, "VARCHAR", 255);
@@ -122,7 +109,7 @@ public class TPCCLoader extends Loader {
     }
 
     protected void transRollback() {
-        if (outputFiles == false) {
+        if (!outputFiles) {
             try {
                 conn.rollback();
             } catch (SQLException se) {
@@ -134,7 +121,7 @@ public class TPCCLoader extends Loader {
     }
 
     protected void transCommit() {
-        if (outputFiles == false) {
+        if (!outputFiles) {
             try {
                 conn.commit();
             } catch (SQLException se) {
@@ -192,7 +179,7 @@ public class TPCCLoader extends Loader {
             LOG.debug("\nStart Item Load for " + t + " Items @ " + now
                     + " ...");
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "item.csv"));
                 LOG.debug("\nWriting Item file to: " + fileLocation
@@ -227,12 +214,15 @@ public class TPCCLoader extends Loader {
 
                 k++;
 
-                if (outputFiles == false) {
+                if (!outputFiles) {
                     itemPrepStmt.setLong(1, item.i_id);
                     itemPrepStmt.setString(2, item.i_name);
                     itemPrepStmt.setDouble(3, item.i_price);
                     itemPrepStmt.setString(4, item.i_data);
                     itemPrepStmt.setLong(5, item.i_im_id);
+                    if (workConf.hasSchemaConfiguration()) {
+                        workConf.getSchemaConfiguration().extendPreparedStatement(itemPrepStmt, 6);
+                    }
                     itemPrepStmt.addBatch();
 
                     if ((k % configCommitCount) == 0) {
@@ -254,6 +244,9 @@ public class TPCCLoader extends Loader {
                     str = str + item.i_price + ",";
                     str = str + item.i_data + ",";
                     str = str + item.i_im_id;
+                    if (workConf.hasSchemaConfiguration()) {
+                        str += ";" + workConf.getSchemaConfiguration().extendByString();
+                    }
                     out.println(str);
 
                     if ((k % configCommitCount) == 0) {
@@ -277,7 +270,7 @@ public class TPCCLoader extends Loader {
                     + " of " + t);
             lastTimeMS = tmpTime;
 
-            if (outputFiles == false) {
+            if (!outputFiles) {
                 itemPrepStmt.executeBatch();
             }
 
@@ -312,7 +305,7 @@ public class TPCCLoader extends Loader {
             LOG.debug("\nStart Whse Load for " + whseKount
                     + " Whses @ " + now + " ...");
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "warehouse.csv"));
                 LOG.debug("\nWriting Warehouse file to: "
@@ -339,7 +332,7 @@ public class TPCCLoader extends Loader {
                 warehouse.w_state = TPCCUtil.randomStr(3).toUpperCase();
                 warehouse.w_zip = "123456789";
 
-                if (outputFiles == false) {
+                if (!outputFiles) {
                     whsePrepStmt.setLong(1, warehouse.w_id);
                     whsePrepStmt.setDouble(2, warehouse.w_ytd);
                     whsePrepStmt.setDouble(3, warehouse.w_tax);
@@ -404,7 +397,7 @@ public class TPCCLoader extends Loader {
             LOG.debug("\nStart Stock Load for " + t + " units @ "
                     + now + " ...");
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "stock.csv"));
                 LOG.debug("\nWriting Stock file to: " + fileLocation
@@ -453,7 +446,7 @@ public class TPCCLoader extends Loader {
                     stock.s_dist_10 = TPCCUtil.randomStr(24);
 
                     k++;
-                    if (outputFiles == false) {
+                    if (!outputFiles) {
                         stckPrepStmt.setLong(1, stock.s_w_id);
                         stckPrepStmt.setLong(2, stock.s_i_id);
                         stckPrepStmt.setLong(3, stock.s_quantity);
@@ -527,7 +520,7 @@ public class TPCCLoader extends Loader {
             LOG.debug(etStr.substring(0, 30)
                     + "  Writing final records " + k + " of " + t);
             lastTimeMS = tmpTime;
-            if (outputFiles == false) {
+            if (!outputFiles) {
                 stckPrepStmt.executeBatch();
             }
             transCommit();
@@ -560,7 +553,7 @@ public class TPCCLoader extends Loader {
 
             now = new java.util.Date();
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "district.csv"));
                 LOG.debug("\nWriting District file to: "
@@ -599,7 +592,7 @@ public class TPCCLoader extends Loader {
                     district.d_zip = "123456789";
 
                     k++;
-                    if (outputFiles == false) {
+                    if (!outputFiles) {
                         distPrepStmt.setLong(1, district.d_w_id);
                         distPrepStmt.setLong(2, district.d_id);
                         distPrepStmt.setDouble(3, district.d_ytd);
@@ -611,6 +604,11 @@ public class TPCCLoader extends Loader {
                         distPrepStmt.setString(9, district.d_city);
                         distPrepStmt.setString(10, district.d_state);
                         distPrepStmt.setString(11, district.d_zip);
+
+                        if (workConf.hasSchemaConfiguration()) {
+                            workConf.getSchemaConfiguration().extendPreparedStatement(distPrepStmt, 12);
+                        }
+
                         distPrepStmt.executeUpdate();
                     } else {
                         String str = "";
@@ -625,6 +623,9 @@ public class TPCCLoader extends Loader {
                         str = str + district.d_city + ",";
                         str = str + district.d_state + ",";
                         str = str + district.d_zip;
+                        if (workConf.hasSchemaConfiguration()) {
+                            str += ";" + workConf.getSchemaConfiguration().extendByString();
+                        }
                         out.println(str);
                     }
 
@@ -670,7 +671,7 @@ public class TPCCLoader extends Loader {
 
             now = new java.util.Date();
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "customer.csv"));
                 LOG.debug("\nWriting Customer file to: "
@@ -750,7 +751,7 @@ public class TPCCLoader extends Loader {
                                 .randomNumber(10, 24, gen));
 
                         k = k + 2;
-                        if (outputFiles == false) {
+                        if (!outputFiles) {
                             custPrepStmt.setLong(1, customer.c_w_id);
                             custPrepStmt.setLong(2, customer.c_d_id);
                             custPrepStmt.setLong(3, customer.c_id);
@@ -881,7 +882,7 @@ public class TPCCLoader extends Loader {
             histPrepStmt.clearBatch();
             transCommit();
             now = new java.util.Date();
-            if (outputFiles == true) {
+            if (outputFiles) {
                 outHist.close();
             }
             LOG.debug("End Cust-Hist Data Load @  " + now);
@@ -889,13 +890,13 @@ public class TPCCLoader extends Loader {
         } catch (SQLException se) {
             LOG.debug(se.getMessage());
             transRollback();
-            if (outputFiles == true) {
+            if (outputFiles) {
                 outHist.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
             transRollback();
-            if (outputFiles == true) {
+            if (outputFiles) {
                 outHist.close();
             }
         }
@@ -916,7 +917,7 @@ public class TPCCLoader extends Loader {
             PreparedStatement nworPrepStmt = getInsertStatement(TPCCConstants.TABLENAME_NEWORDER);
             PreparedStatement orlnPrepStmt = getInsertStatement(TPCCConstants.TABLENAME_ORDERLINE);
 
-            if (outputFiles == true) {
+            if (outputFiles) {
                 out = new PrintWriter(new FileOutputStream(fileLocation
                         + "order.csv"));
                 LOG.debug("\nWriting Order file to: " + fileLocation
@@ -982,7 +983,7 @@ public class TPCCLoader extends Loader {
                         oorder.o_entry_d = System.currentTimeMillis();
 
                         k++;
-                        if (outputFiles == false) {
+                        if (!outputFiles) {
                             myJdbcIO.insertOrder(ordrPrepStmt, oorder);
                         } else {
                             String str = "";
@@ -996,6 +997,11 @@ public class TPCCLoader extends Loader {
                             Timestamp entry_d = new java.sql.Timestamp(
                                     oorder.o_entry_d);
                             str = str + entry_d;
+
+                            if (workConf.hasSchemaConfiguration()) {
+                                str += ";" + workConf.getSchemaConfiguration().extendByString();
+                            }
+
                             out.println(str);
                         }
 
@@ -1012,7 +1018,7 @@ public class TPCCLoader extends Loader {
                             new_order.no_o_id = c;
 
                             k++;
-                            if (outputFiles == false) {
+                            if (!outputFiles) {
                                 myJdbcIO.insertNewOrder(nworPrepStmt, new_order);
                             } else {
                                 String str = "";
@@ -1048,7 +1054,7 @@ public class TPCCLoader extends Loader {
 
 
                             k++;
-                            if (outputFiles == false) {
+                            if (!outputFiles) {
 
                                 myJdbcIO.insertOrderLine(orlnPrepStmt,
                                         order_line);
@@ -1087,7 +1093,7 @@ public class TPCCLoader extends Loader {
                                 LOG.debug(etStr.substring(0, 30)
                                         + "  Writing record " + k + " of " + t);
                                 lastTimeMS = tmpTime;
-                                if (outputFiles == false) {
+                                if (!outputFiles) {
 
                                     ordrPrepStmt.executeBatch();
                                     nworPrepStmt.executeBatch();
@@ -1108,7 +1114,7 @@ public class TPCCLoader extends Loader {
             } // end for [w]
 
             LOG.debug("  Writing final records " + k + " of " + t);
-            if (outputFiles == false) {
+            if (!outputFiles) {
                 ordrPrepStmt.executeBatch();
                 nworPrepStmt.executeBatch();
                 orlnPrepStmt.executeBatch();
@@ -1127,10 +1133,11 @@ public class TPCCLoader extends Loader {
         } catch (Exception e) {
             e.printStackTrace();
             transRollback();
-            if (outputFiles == true) {
-                outLine.close();
-                outNewOrder.close();
+            if (!outputFiles) {
+                return (k);
             }
+            outLine.close();
+            outNewOrder.close();
         }
 
         return (k);
@@ -1148,7 +1155,7 @@ public class TPCCLoader extends Loader {
     @Override
     public void load() throws SQLException {
 
-        if (outputFiles == false) {
+        if (!outputFiles) {
 
             // Clearout the tables
             truncateTable(TPCCConstants.TABLENAME_ITEM);
