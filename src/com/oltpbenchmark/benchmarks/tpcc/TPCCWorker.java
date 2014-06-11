@@ -96,6 +96,7 @@ public class TPCCWorker extends Worker {
         	throw new RuntimeException("Bad transaction type = "+ nextTransaction);
 	    } catch (RuntimeException ex) {
 	        conn.rollback();
+            System.err.println(ex.getLocalizedMessage());
 	        return (TransactionStatus.RETRY_DIFFERENT);
 	    }
 		transactionCount++;

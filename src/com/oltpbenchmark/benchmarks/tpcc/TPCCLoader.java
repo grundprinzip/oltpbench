@@ -543,8 +543,10 @@ public class TPCCLoader extends Loader {
 
         try {
 
-            String sql = SQLUtil.getInsertSQL(this.getTableCatalog(TPCCConstants.TABLENAME_DISTRICT));
-            PreparedStatement distPrepStmt = this.conn.prepareStatement(sql);
+            PreparedStatement distPrepStmt =  getInsertStatement(TPCCConstants.TABLENAME_DISTRICT);
+
+//            String sql = SQLUtil.getInsertSQL(this.getTableCatalog(TPCCConstants.TABLENAME_DISTRICT));
+//            PreparedStatement distPrepStmt = this.conn.prepareStatement(sql);
 
             now = new java.util.Date();
 
