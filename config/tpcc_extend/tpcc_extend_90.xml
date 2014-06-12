@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<parameters>
+
+    <!-- Connection details -->
+    <dbtype>mysql</dbtype>
+    <driver>com.mysql.jdbc.Driver</driver>
+    <DBUrl>jdbc:mysql://localhost:3306/tpcc</DBUrl>
+    <username>root</username>
+    <password>root</password>
+    <isolation>TRANSACTION_SERIALIZABLE</isolation>
+
+    <!-- Scale factor is the number of warehouses in TPCC -->
+    <scalefactor>10</scalefactor>
+
+    <schema>
+        <!-- Extend the schema by x columns, each loader has to handle the information provided here -->
+        <extendBy>90</extendBy>
+        <useFieldsDuringQueries>true</useFieldsDuringQueries>
+
+        <!-- Change distribution of columns in this benchmark -->
+        <distributionMap>
+            <column>
+                <table>order_line</table>
+                <name>OL_I_ID</name>
+                <value>zipf</value>
+                <type>java.lang.Integer</type>
+                <param>2</param>
+            </column>
+        </distributionMap>
+
+
+    </schema>
+
+    <!-- The workload -->
+    <terminals>20</terminals>
+    <works>
+        <work>
+            <time>300</time>
+            <rate>10000</rate>
+            <weights>45,43,4,4,4</weights>
+        </work>
+    </works>
+
+    <!-- TPCC specific -->
+    <transactiontypes>
+        <transactiontype>
+            <name>NewOrder</name>
+        </transactiontype>
+        <transactiontype>
+            <name>Payment</name>
+        </transactiontype>
+        <transactiontype>
+            <name>OrderStatus</name>
+        </transactiontype>
+        <transactiontype>
+            <name>Delivery</name>
+        </transactiontype>
+        <transactiontype>
+            <name>StockLevel</name>
+        </transactiontype>
+    </transactiontypes>
+</parameters>
+
